@@ -1,4 +1,4 @@
-import yaml, chromadb, sentence_transformers, transformers, langchain
+import yaml, chromadb, sentence_transformers, transformers, langchain, torch
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
@@ -33,8 +33,15 @@ for j, d in content.items():
             }
         ))
 
+contents = [doc.page_content for doc in chunked]
+
 #embedding model loading
+device = "cuda" if torch.cuda.is_available() else "cpu"
 embedding_model = sentence_transformers.SentenceTransformer("BAAI/bge-m3")
+embedded = embedding_model.encode(contents,
+                                  batch_size= 64,
+                                  normalize_embeddings = True
+                                  )
 
 # Initialize ChromaDB
 client = chromadb.Client()
