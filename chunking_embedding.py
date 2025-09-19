@@ -2,6 +2,7 @@ import yaml, chromadb, sentence_transformers, transformers, langchain, torch
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
+
 #open yaml files
 files = ["SO-XP.yaml", "SO-11P.yaml"]
 
@@ -19,6 +20,7 @@ for m, c in data.items():
         "content": c.get("content", "")
     }
 
+
 #chunking
 chunked = []
 splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap = 120)
@@ -35,13 +37,15 @@ for j, d in content.items():
 
 contents = [doc.page_content for doc in chunked]
 
+
 #embedding model loading
-device = "cuda" if torch.cuda.is_available() else "cpu"
-embedding_model = sentence_transformers.SentenceTransformer("BAAI/bge-m3")
-embedded = embedding_model.encode(contents,
+cuda = "cuda" if torch.cuda.is_available() else "cpu"
+embedding_model = sentence_transformers.SentenceTransformer("intfloat/e5-Large-v2", device = cuda)
+embedded_data = embedding_model.encode(contents,
                                   batch_size= 64,
                                   normalize_embeddings = True
                                   )
+
 
 # Initialize ChromaDB
 client = chromadb.Client()
