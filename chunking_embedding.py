@@ -1,6 +1,7 @@
-import yaml, chromadb, sentence_transformers, transformers, langchain, torch
+import yaml, chromadb, sentence_transformers, transformers, langchain, torch, os
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
+from pathlib import Path
 
 
 #open yaml files
@@ -19,6 +20,12 @@ for m, c in data.items():
         "url": c.get("url", ""),
         "content": c.get("content", "")
     }
+
+
+# Initialize ChromaDB
+DB_path = Path("data/chroma").as_posix()
+os.makedirs(DB_path, exist_ok = True)
+client = chromadb.PersistentClient(path = DB_path)
 
 
 #chunking
@@ -42,10 +49,6 @@ contents = [doc.page_content for doc in chunked]
 cuda = "cuda" if torch.cuda.is_available() else "cpu"
 embedding_model = sentence_transformers.SentenceTransformer("intfloat/e5-Large-v2", device = cuda)
 embedded_data = embedding_model.encode(contents,
-                                  batch_size= 64,
-                                  normalize_embeddings = True
-                                  )
-
-
-# Initialize ChromaDB
-client = chromadb.Client()
+                                       batch_size = 32,
+                                       normalize = True
+                                       )
