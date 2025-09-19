@@ -34,21 +34,40 @@ splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap = 120)
 for j, d in content.items():
     for i in splitter.split_text(d["content"]):
         chunked.append(Document(
-            page_content = i,
+            page_content = "passage: " +  i,
             metadata = {
-                "title": d["content"],
+                "title": d["title"],
                 "tags": d["tags"],
                 "url": d["url"]
             }
         ))
 
 contents = [doc.page_content for doc in chunked]
+metadata = [doc.metadata for doc in chunked]
 
 
-#embedding model loading
+#embedding model
 cuda = "cuda" if torch.cuda.is_available() else "cpu"
-embedding_model = sentence_transformers.SentenceTransformer("intfloat/e5-Large-v2", device = cuda)
+embedding_model = sentence_transformers.SentenceTransformer("intfloat/e5-large-v2", device = cuda)
 embedded_data = embedding_model.encode(contents,
                                        batch_size = 32,
                                        normalize = True
-                                       )
+                                       ).tolist()
+
+
+#create collection and push embedding data
+collection = client.get_or_create_collection(
+                                                name = "SOP_file",
+                                                metadata={"hnsw:space": "cosine"}
+                                            )
+
+ids = [f"{m['title']}-{idx}" for idx, m in enumerate(metadata)]
+batch = 256
+
+for i in range(0, len(ids), batch):
+    collection.upsert(
+                    ids = ids[i:i+batch],
+                    embeddings = embedded_data[i:i+batch],
+                    documents = contents[i:i+batch],
+                    metadatas = metadata[i:i+batch]
+                    )
