@@ -36,7 +36,7 @@ for j, d in content.items():
         chunked.append(Document(
             page_content = "passage: " +  i,
             metadata = {
-                "title": d["title"],
+                "title": d["titles"],
                 "tags": d["tags"],
                 "url": d["url"]
             }
