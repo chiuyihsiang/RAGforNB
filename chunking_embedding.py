@@ -1,4 +1,4 @@
-import yaml, chromadb, sentence_transformers, transformers, langchain, torch, os
+import yaml, chromadb, sentence_transformers, torch, os
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 from pathlib import Path
@@ -30,7 +30,7 @@ client = chromadb.PersistentClient(path = DB_path)
 
 #chunking
 chunked = []
-splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap = 120)
+splitter = RecursiveCharacterTextSplitter(chunk_size = 400, chunk_overlap = 80)
 for j, d in content.items():
     for i in splitter.split_text(d["content"]):
         chunked.append(Document(
