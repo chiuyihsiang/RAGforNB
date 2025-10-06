@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 #open yaml files
-files = ["SO-XP.yaml", "SO-11P.yaml"]
+files = ["RAGintroduction.yaml"]
 
 data = {}
 for f in files:
@@ -16,8 +16,6 @@ content = {}
 for m, c in data.items():
     content[m] = {
         "titles": c.get("title", ""),
-        "tags": c.get("tags", []),
-        "url": c.get("url", ""),
         "content": c.get("content", "")
     }
 
@@ -30,15 +28,13 @@ client = chromadb.PersistentClient(path = DB_path)
 
 #chunking
 chunked = []
-splitter = RecursiveCharacterTextSplitter(chunk_size = 400, chunk_overlap = 80)
+splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap = 120)
 for j, d in content.items():
     for i in splitter.split_text(d["content"]):
         chunked.append(Document(
             page_content = "passage: " +  i,
             metadata = {
-                "title": d["titles"],
-                "tags": d["tags"],
-                "url": d["url"]
+                "title": d["titles"]
             }
         ))
 
@@ -57,7 +53,7 @@ embedded_data = embedding_model.encode(contents,
 
 #create collection and push embedding data
 collection = client.get_or_create_collection(
-                                                name = "SOP_file",
+                                                name = "RAG",
                                                 metadata={"hnsw:space": "cosine"}
                                             )
 
