@@ -51,7 +51,7 @@ cuda = "cuda" if torch.cuda.is_available() else "cpu"
 embedding_model = sentence_transformers.SentenceTransformer("intfloat/e5-large-v2", device = cuda)
 embedded_data = embedding_model.encode(contents,
                                        batch_size = 32,
-                                       normalize = True
+                                       normalize_embedding = True
                                        ).tolist()
 
 
