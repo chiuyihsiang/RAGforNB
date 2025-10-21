@@ -52,7 +52,7 @@ with torch.no_grad():
     out = gen.generate(
         **input,
         max_new_tokens = 200,
-        temperature = 0.5,
+        temperature = 0.1,
         top_p = 0.9,
         do_sample = True,
         eos_token_id = tok.eos_token_id
